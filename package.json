@@ -6,8 +6,8 @@
     "wss": "node server/websocket.js",
     "dev": "concurrently \"next dev\" \"npm run wss\"",
     "build": "next build",
-    "start": "concurrently \"next start\" \"npm run wss\"",
-    "prod": "next build && npm run start",
+    "start": "next start",
+    "prod": "next build && concurrently \"next start\" \"npm run wss\"",
     "lint": "next lint"
   },
   "dependencies": {

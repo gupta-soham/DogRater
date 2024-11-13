@@ -3,7 +3,6 @@ import { rateDog } from '@/lib/db';
 
 export async function POST(
   request: NextRequest,
-  // { params }: { params: { id: string } }
 ) {
   try {
     const { rating, dogId } = await request.json();

@@ -41,7 +41,7 @@ const RankBadge = ({ rank }: { rank: number }) => {
   const label = rank <= 3 ? badges[rank as 1 | 2 | 3].label : badges.last.label;
 
   return (
-    <Badge variant="secondary" className={`${badgeColor} gap-1 ml-2`}>
+    <Badge variant="secondary" className={`${badgeColor} gap-1 ml-2 text-xs`}>
       <BadgeIcon className="h-3 w-3" />
       {label}
     </Badge>
@@ -75,7 +75,7 @@ export function Leaderboard({ dogs }: LeaderboardProps) {
           value={selectedCountry}
           onValueChange={(value) => setSelectedCountry(value as Country)}
         >
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-full sm:w-[140px]">
             <SelectValue placeholder="Country" />
           </SelectTrigger>
           <SelectContent>
@@ -96,7 +96,7 @@ export function Leaderboard({ dogs }: LeaderboardProps) {
             return (
               <div
                 key={dog.id}
-                className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors"
+                className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors"
               >
                 <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center font-semibold text-muted-foreground">
                   {index + 1}
