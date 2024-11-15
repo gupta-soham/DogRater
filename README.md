@@ -19,6 +19,9 @@ A modern web application for rating dogs with real-time chat functionality. Buil
 
 ## 🚀 Getting Started
 
+> [!NOTE]
+> This project uses [pnpm](https://pnpm.io/) as a package manager.
+
 1. Clone the repository:
 
 ```bash
