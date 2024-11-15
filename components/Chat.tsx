@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Message } from "@/lib/types";
 import { AvatarImage } from "@radix-ui/react-avatar";
-import { MessageSquare } from "lucide-react";
+import { Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -34,7 +34,9 @@ export function Chat({ username }: ChatProps) {
       setConnectionError(true);
       return;
     }
-    const socket = new WebSocket(wsUrl);
+    const socket = new WebSocket(
+      `${wsUrl}?user-agent=${encodeURIComponent(navigator.userAgent)}`
+    );
 
     socket.onopen = () => {
       console.log("Connected to WebSocket");
@@ -92,6 +94,18 @@ export function Chat({ username }: ChatProps) {
     setNewMessage("");
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (connectionError) {
+        toast.error("The WebSocket Server is down! 😔 ", {
+          duration: 10000,
+        });
+      }
+    }, 4000);
+
+    return () => clearTimeout(timer);
+  }, [connectionError]);
+
   return (
     <Card className="h-[calc(100vh-8rem)] md:h-[calc(100vh-10rem)] flex flex-col">
       {connectionError && (
@@ -146,7 +160,7 @@ export function Chat({ username }: ChatProps) {
             className="px-3 md:px-4"
             disabled={connectionError}
           >
-            <MessageSquare className="h-4 w-4 md:mr-2" />
+            <Send className="h-4 w-4 md:mr-2" />
             <span className="hidden md:inline">Send</span>
           </Button>
         </div>

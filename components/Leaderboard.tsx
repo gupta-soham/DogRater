@@ -26,7 +26,7 @@ const COUNTRIES: Country[] = [
   "Wales",
 ];
 
-const RankBadge = ({ rank }: { rank: number }) => {
+const RankBadge = ({ rank }: { rank: number | "last" }) => {
   const badges = {
     1: { icon: Trophy, color: "bg-yellow-500", label: "1st" },
     2: { icon: Medal, color: "bg-gray-400", label: "2nd" },
@@ -35,10 +35,11 @@ const RankBadge = ({ rank }: { rank: number }) => {
   };
 
   const BadgeIcon =
-    rank <= 3 ? badges[rank as 1 | 2 | 3].icon : badges.last.icon;
+    rank === "last" ? badges.last.icon : badges[rank as 1 | 2 | 3].icon;
   const badgeColor =
-    rank <= 3 ? badges[rank as 1 | 2 | 3].color : badges.last.color;
-  const label = rank <= 3 ? badges[rank as 1 | 2 | 3].label : badges.last.label;
+    rank === "last" ? badges.last.color : badges[rank as 1 | 2 | 3].color;
+  const label =
+    rank === "last" ? badges.last.label : badges[rank as 1 | 2 | 3].label;
 
   return (
     <Badge variant="secondary" className={`${badgeColor} gap-1 ml-2 text-xs`}>
@@ -69,8 +70,8 @@ export function Leaderboard({ dogs }: LeaderboardProps) {
 
   return (
     <Card className="h-[calc(100vh-8rem)] md:h-[calc(100vh-10rem)] flex flex-col">
-      <div className="flex justify-between items-center p-4 border-b shrink-0">
-        <h2 className="text-2xl font-bold">Leaderboard</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border-b gap-4 sm:gap-2">
+        <h2 className="text-xl sm:text-2xl font-bold">Leaderboard</h2>
         <Select
           value={selectedCountry}
           onValueChange={(value) => setSelectedCountry(value as Country)}
@@ -88,7 +89,7 @@ export function Leaderboard({ dogs }: LeaderboardProps) {
         </Select>
       </div>
 
-      <ScrollArea className="flex-1 h-full">
+      <ScrollArea className="flex-1">
         <div className="p-4 space-y-3">
           {filteredDogs.map((dog, index, array) => {
             const rank = getDogRank(index, array.length);
@@ -106,18 +107,18 @@ export function Leaderboard({ dogs }: LeaderboardProps) {
                   <Image
                     src={dog.image}
                     alt={dog.breed}
+                    className="w-full h-full object-cover"
                     width={40}
                     height={40}
-                    className="w-full h-full object-cover"
                   />
                 </div>
 
                 <div className="flex-grow min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-semibold truncate">{dog.breed}</h3>
-                    {typeof rank === "number" && <RankBadge rank={rank} />}
+                    {rank && <RankBadge rank={rank} />}
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
                     <Badge variant="outline" className="font-normal">
                       {dog.country}
                     </Badge>
@@ -125,9 +126,9 @@ export function Leaderboard({ dogs }: LeaderboardProps) {
                   </div>
                 </div>
 
-                <div className="flex-shrink-0 text-right">
-                  <div className="text-xl font-bold tabular-nums">
-                    {dog.rating > 0 ? "+" : ""}
+                <div className="flex-shrink-0 text-right ml-auto">
+                  <div className="text-lg sm:text-xl font-bold tabular-nums">
+                    {(dog.rating ?? 0) > 0 ? "+" : ""}
                     {(dog.rating ?? 0).toFixed(1)}
                   </div>
                   <div className="text-xs text-muted-foreground">Rating</div>
