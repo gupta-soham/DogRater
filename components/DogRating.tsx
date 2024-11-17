@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DogCard } from "./DogCard";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Dog } from "@/lib/types";
+import { useState } from "react";
+import { DogCard } from "./DogCard";
 
 interface DogRatingProps {
   dogs: Dog[];
@@ -13,6 +14,13 @@ interface DogRatingProps {
 
 export function DogRating({ dogs, onRate }: DogRatingProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Simulate loading state
+  useState(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1000);
+    return () => clearTimeout(timer);
+  });
 
   const handleSwipe = (direction: number) => {
     if (currentIndex < dogs.length) {
@@ -22,6 +30,21 @@ export function DogRating({ dogs, onRate }: DogRatingProps) {
       }, 200);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="relative w-full aspect-[4/5]">
+          <Card className="p-4 md:p-6 w-full">
+            <Skeleton className="aspect-square w-full mb-4 rounded-lg" />
+            <Skeleton className="h-8 w-3/4 mb-2" />
+            <Skeleton className="h-4 w-1/2 mb-2" />
+            <Skeleton className="h-4 w-1/3" />
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   if (currentIndex >= dogs.length) {
     return (

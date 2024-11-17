@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Message } from "@/lib/types";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { Send } from "lucide-react";
@@ -20,6 +21,7 @@ export function Chat({ username }: ChatProps) {
   const [newMessage, setNewMessage] = useState("");
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [connectionError, setConnectionError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -41,6 +43,8 @@ export function Chat({ username }: ChatProps) {
     socket.onopen = () => {
       console.log("Connected to WebSocket");
       setConnectionError(false);
+      // Simulate loading state
+      setTimeout(() => setIsLoading(false), 1000);
     };
 
     socket.onmessage = (event) => {
@@ -114,35 +118,51 @@ export function Chat({ username }: ChatProps) {
         </div>
       )}
       <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex items-start gap-2 ${
-                message.user === username ? "flex-row-reverse" : ""
-              }`}
-            >
-              <Avatar className="h-8 w-8 flex-shrink-0">
-                <AvatarImage
-                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${message.user}`}
-                  alt={message.user}
-                />
-              </Avatar>
+        {isLoading ? (
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <Skeleton className="h-8 w-8 rounded-full" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-16 w-[200px] rounded-lg" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {messages.map((message) => (
               <div
-                className={`rounded-lg p-3 max-w-[80%] break-words ${
-                  message.user === username
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
+                key={message.id}
+                className={`flex items-start gap-2 ${
+                  message.user === username ? "flex-row-reverse" : ""
                 }`}
               >
-                <p className="text-sm font-medium">{message.user}</p>
-                <p className="whitespace-pre-wrap">{message.content}</p>
-                <span className="text-xs opacity-70">{message.timestamp}</span>
+                <Avatar className="h-8 w-8 flex-shrink-0">
+                  <AvatarImage
+                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${message.user}`}
+                    alt={message.user}
+                  />
+                </Avatar>
+                <div
+                  className={`rounded-lg p-3 max-w-[80%] break-words ${
+                    message.user === username
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted"
+                  }`}
+                >
+                  <p className="text-sm font-medium">{message.user}</p>
+                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  <span className="text-xs opacity-70">
+                    {message.timestamp}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+        )}
       </ScrollArea>
 
       <form onSubmit={handleSubmit} className="p-4 border-t shrink-0">
@@ -153,12 +173,12 @@ export function Chat({ username }: ChatProps) {
             placeholder="Type a message..."
             className="flex-1"
             maxLength={500}
-            disabled={connectionError}
+            disabled={connectionError || isLoading}
           />
           <Button
             type="submit"
             className="px-3 md:px-4"
-            disabled={connectionError}
+            disabled={connectionError || isLoading}
           >
             <Send className="h-4 w-4 md:mr-2" />
             <span className="hidden md:inline">Send</span>

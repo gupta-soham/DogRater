@@ -10,10 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Country, Dog } from "@/lib/types";
 import { Award, Medal, ThumbsDown, Trophy } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const COUNTRIES: Country[] = [
   "ALL",
@@ -55,6 +56,12 @@ interface LeaderboardProps {
 
 export function Leaderboard({ dogs }: LeaderboardProps) {
   const [selectedCountry, setSelectedCountry] = useState<Country>("ALL");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filteredDogs = dogs
     .filter((dog) =>
@@ -91,51 +98,73 @@ export function Leaderboard({ dogs }: LeaderboardProps) {
 
       <ScrollArea className="flex-1">
         <div className="p-4 space-y-3">
-          {filteredDogs.map((dog, index, array) => {
-            const rank = getDogRank(index, array.length);
-
-            return (
-              <div
-                key={dog.id}
-                className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors"
-              >
-                <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center font-semibold text-muted-foreground">
-                  {index + 1}
-                </div>
-
-                <div className="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden">
-                  <Image
-                    src={dog.image}
-                    alt={dog.breed}
-                    className="w-full h-full object-cover"
-                    width={40}
-                    height={40}
-                  />
-                </div>
-
-                <div className="flex-grow min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-semibold truncate">{dog.breed}</h3>
-                    {rank && <RankBadge rank={rank} />}
+          {isLoading
+            ? Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg"
+                >
+                  <Skeleton className="w-8 h-8 rounded-full" />
+                  <Skeleton className="w-10 h-10 rounded-full" />
+                  <div className="flex-grow space-y-2">
+                    <Skeleton className="h-5 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
-                    <Badge variant="outline" className="font-normal">
-                      {dog.country}
-                    </Badge>
-                    <span className="truncate">{dog.lifeExpectancy} years</span>
+                  <div className="flex-shrink-0 space-y-1">
+                    <Skeleton className="h-6 w-16" />
+                    <Skeleton className="h-4 w-12" />
                   </div>
                 </div>
+              ))
+            : filteredDogs.map((dog, index, array) => {
+                const rank = getDogRank(index, array.length);
 
-                <div className="flex-shrink-0 text-right ml-auto">
-                  <div className="text-lg sm:text-xl font-bold tabular-nums">
-                    {(dog.rating ?? 0) > 0 ? "+" : ""}
-                    {(dog.rating ?? 0).toFixed(1)}
+                return (
+                  <div
+                    key={dog.id}
+                    className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors"
+                  >
+                    <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center font-semibold text-muted-foreground">
+                      {index + 1}
+                    </div>
+
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden">
+                      <Image
+                        src={dog.image}
+                        alt={dog.breed}
+                        className="w-full h-full object-cover"
+                        width={40}
+                        height={40}
+                      />
+                    </div>
+
+                    <div className="flex-grow min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-semibold truncate">{dog.breed}</h3>
+                        {rank && <RankBadge rank={rank} />}
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+                        <Badge variant="outline" className="font-normal">
+                          {dog.country}
+                        </Badge>
+                        <span className="truncate">
+                          {dog.lifeExpectancy} years
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex-shrink-0 text-right ml-auto">
+                      <div className="text-lg font-bold tabular-nums">
+                        {(dog.rating ?? 0) > 0 ? "+" : ""}
+                        {(dog.rating ?? 0).toFixed(1)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Rating
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground">Rating</div>
-                </div>
-              </div>
-            );
-          })}
+                );
+              })}
         </div>
       </ScrollArea>
     </Card>
