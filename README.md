@@ -93,12 +93,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 1. Fork the repository
 
-2. Clone the fork to your local machine:
-
-```bash
-git clone https://github.com/<your username>/cms.git
-cd DogRater
-```
+2. Clone the fork to your local machine
 
 3. Create a new branch
 
