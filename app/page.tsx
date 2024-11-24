@@ -39,8 +39,6 @@ export default function Home() {
           dog.id === dogId ? { ...dog, rating: response.data.rating } : dog
         )
       );
-
-      toast.success("Rating submitted successfully");
     } catch (error) {
       toast.error("Failed to submit rating. Please try again.");
     }

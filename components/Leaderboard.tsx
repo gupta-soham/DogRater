@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Country, Dog } from "@/lib/types";
 import { Award, Medal, ThumbsDown, Trophy } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 
 const COUNTRIES: Country[] = [
   "ALL",
@@ -27,7 +27,7 @@ const COUNTRIES: Country[] = [
   "Wales",
 ];
 
-const RankBadge = ({ rank }: { rank: number | "last" }) => {
+const RankBadge = memo(function RankBadge({ rank }: { rank: number | "last" }) {
   const badges = {
     1: { icon: Trophy, color: "bg-yellow-500", label: "1st" },
     2: { icon: Medal, color: "bg-gray-400", label: "2nd" },
@@ -48,7 +48,7 @@ const RankBadge = ({ rank }: { rank: number | "last" }) => {
       {label}
     </Badge>
   );
-};
+});
 
 interface LeaderboardProps {
   dogs: Dog[];
@@ -63,17 +63,15 @@ export function Leaderboard({ dogs }: LeaderboardProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  const filteredDogs = dogs
-    .filter((dog) =>
-      selectedCountry === "ALL" ? true : dog.country === selectedCountry
-    )
-    .sort((a, b) => b.rating - a.rating);
-
-  const getDogRank = (index: number, total: number) => {
-    if (index < 3) return index + 1;
-    if (index === total - 1 && total > 3) return "last";
-    return null;
-  };
+  const filteredDogs = useMemo(
+    () =>
+      dogs
+        .filter((dog) =>
+          selectedCountry === "ALL" ? true : dog.country === selectedCountry
+        )
+        .sort((a, b) => b.rating - a.rating),
+    [dogs, selectedCountry]
+  );
 
   return (
     <Card className="h-[calc(100vh-8rem)] md:h-[calc(100vh-10rem)] flex flex-col">
@@ -116,57 +114,68 @@ export function Leaderboard({ dogs }: LeaderboardProps) {
                   </div>
                 </div>
               ))
-            : filteredDogs.map((dog, index, array) => {
-                const rank = getDogRank(index, array.length);
-
-                return (
-                  <div
-                    key={dog.id}
-                    className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors"
-                  >
-                    <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center font-semibold text-muted-foreground">
-                      {index + 1}
-                    </div>
-
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden">
-                      <Image
-                        src={dog.image}
-                        alt={dog.breed}
-                        className="w-full h-full object-cover"
-                        width={40}
-                        height={40}
-                      />
-                    </div>
-
-                    <div className="flex-grow min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-semibold truncate">{dog.breed}</h3>
-                        {rank && <RankBadge rank={rank} />}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
-                        <Badge variant="outline" className="font-normal">
-                          {dog.country}
-                        </Badge>
-                        <span className="truncate">
-                          {dog.lifeExpectancy} years
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex-shrink-0 text-right ml-auto">
-                      <div className="text-lg font-bold tabular-nums">
-                        {(dog.rating ?? 0) > 0 ? "+" : ""}
-                        {(dog.rating ?? 0).toFixed(1)}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Rating
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+            : filteredDogs.map((dog, index) => (
+                <LeaderboardItem
+                  key={dog.id}
+                  dog={dog}
+                  index={index}
+                  total={filteredDogs.length}
+                />
+              ))}
         </div>
       </ScrollArea>
     </Card>
   );
 }
+
+const LeaderboardItem = memo(function LeaderboardItem({
+  dog,
+  index,
+  total,
+}: {
+  dog: Dog;
+  index: number;
+  total: number;
+}) {
+  const rank =
+    index < 3 ? index + 1 : index === total - 1 && total > 3 ? "last" : null;
+
+  return (
+    <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
+      <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center font-semibold text-muted-foreground">
+        {index + 1}
+      </div>
+
+      <div className="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden">
+        <Image
+          src={dog.image}
+          alt={dog.breed}
+          className="w-full h-full object-cover"
+          width={40}
+          height={40}
+        />
+      </div>
+
+      <div className="flex-grow min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <h3 className="font-semibold truncate">{dog.breed}</h3>
+          {rank && <RankBadge rank={rank} />}
+        </div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+          <Badge variant="outline" className="font-normal">
+            {dog.country}
+          </Badge>
+          <span className="truncate">{dog.lifeExpectancy} years</span>
+        </div>
+      </div>
+
+      <div className="flex-shrink-0 text-right ml-auto">
+        <div className="text-lg sm:text-xl font-bold tabular-nums">
+          {(dog.rating ?? 0) > 0 ? "+" : ""}
+          {(dog.rating ?? 0).toFixed(1)}
+        </div>
+        <div className="text-xs text-muted-foreground">Rating</div>
+      </div>
+    </div>
+  );
+});

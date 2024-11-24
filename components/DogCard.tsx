@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, useMotionValue, useTransform } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Dog } from "@/lib/types";
-import Image from "next/image";
 import confetti from "canvas-confetti";
+import { motion, useMotionValue, useTransform } from "framer-motion";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
 interface DogCardProps {
   dog: Dog;
@@ -18,25 +18,40 @@ export function DogCard({ dog, onSwipe }: DogCardProps) {
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-25, 25]);
   const opacity = useTransform(x, [-200, -125, 0, 125, 200], [0, 1, 1, 1, 0]);
-  
+
   // Like and Dislike Sound Effects
   const [likeSound, setLikeSound] = useState<HTMLAudioElement | null>(null);
   const [dislikeSound, setDislikeSound] = useState<HTMLAudioElement | null>(null);
+
   useEffect(() => {
-    setLikeSound(new Audio("/sounds/like.wav"));
-    setDislikeSound(new Audio("/sounds/dislike.wav"));
+    // Preload sounds
+    const like = new Audio("/sounds/like.wav");
+    const dislike = new Audio("/sounds/dislike.wav");
+
+    // Optional: Preload audio
+    like.preload = "auto";
+    dislike.preload = "auto";
+
+    setLikeSound(like);
+    setDislikeSound(dislike);
+
+    return () => {
+      like.remove();
+      dislike.remove();
+    };
   }, []);
 
   const triggerConfetti = () => {
     confetti({
-      particleCount: 100,
+      particleCount: 30,
       spread: 70,
       origin: { y: 0.6 },
+      disableForReducedMotion: true,
     });
   };
 
   const handleDragEnd = (event: any, info: any) => {
-    if (info.offset.x > 100) {
+        if (info.offset.x > 100) {
       setExitX(200);
       likeSound?.play().catch(() => {});
       triggerConfetti();
@@ -72,7 +87,7 @@ export function DogCard({ dog, onSwipe }: DogCardProps) {
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            priority
+            loading="eager"
           />
         </div>
         <h2 className="text-xl md:text-2xl font-semibold">{dog.breed}</h2>
