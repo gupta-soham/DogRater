@@ -2,7 +2,7 @@
 
 A modern web application for rating dogs with real-time chat functionality. Built with Next.js, MongoDB, and WebSocket.
 
-![Rate My Dog](https://github.com/user-attachments/assets/033aa6e9-05e7-4d54-85a4-caa379af2094)
+![Rate My Dog](/public/og.png)
 
 ## ✨ Features
 
